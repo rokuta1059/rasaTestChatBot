@@ -1,0 +1,25 @@
+intents:
+  - greet
+  - goodbye
+  - weather
+  - temp
+  - tomorrow_temp
+
+actions:
+- utter_greet
+- utter_goodbye
+- action_weather
+- action_temp
+- action_tomorrow_temp
+
+templates:
+  utter_greet:
+  - text: "안녕?"
+  - text: "ㅎㅇ"
+  - text: "반가워!"
+  - text: "반갑다!"
+
+  utter_goodbye:
+  - text: "잘가!"
+  - text: "들어가라!"
+  - text: "ㅂㅂ"

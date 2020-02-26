@@ -14,6 +14,6 @@
 * temp
   - action_temp
 
-## temp_tomorrow_path
-* tomorrow_temp
-  - action_tomorrow_temp
+## next_temp_path
+* next_temp
+  - action_next_temp

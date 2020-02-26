@@ -14,8 +14,8 @@ from rasa_sdk.executor import CollectingDispatcher
 
 from bs4 import BeautifulSoup
 import urllib.request
-client_id = "NAVER_CLIENT_ID" # 애플리케이션 등록시 발급 받은 값
-client_secret = "NAVER_CLIENT_SECRET" # 애플리케이션 등록시 발급 받은 값
+
+import weather
 
 class ActionWeather(Action):
 
@@ -26,38 +26,12 @@ class ActionWeather(Action):
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
 
-        dispatcher.utter_message("Get Weather!")
+        ## 원하는 위치로 수정 가능
+        coordinate = weather.getLocation("춘천")
+        nowWeather = weather.getNowWeatherData(coordinate)
 
-        encText = urllib.parse.quote('춘천시 효자동 날씨')
-        url = 'https://search.naver.com/search.naver?sm=top_hty&fbm=1&ie=utf8&query=' + encText
-        request = urllib.request.Request(url)
-        request.add_header("X-Naver-Client-Id",client_id)
-        request.add_header("X-Naver-Client-Secret",client_secret)
-        response = urllib.request.urlopen(request)
-        bsObj = BeautifulSoup(response, "html.parser")
-        todayBase = bsObj.find('div', {'class': 'today_area _mainTabContent'})
-
-        temp = bsObj.find('div', {'class': 'select_box'})
-        temp2 = temp.find('em')
-
-        temp = todayBase.find('span', {'class': 'todaytemp'})
-        todayTemp = temp.text.strip()
-
-        temp = todayBase.find('p', {'class': 'cast_txt'})
-        todayCast = temp.text.strip()
-
-        temp = todayBase.find('span', {'class': 'merge'})
-        todayMerge = temp.text.strip()
-
-        temp = todayBase.find('span', {'class': 'sensible'})
-        temp2 = temp.find('span', {'class': 'num'})
-        todaySensible = temp2.text.strip()
-
-        temp = todayBase.find('dl', {'class': 'indicator'})
-        temp2 = temp.find_all('dd')
-        todayDust = temp2[0].text.strip()
-
-        result = "날씨는 {0}! 기온은 {1}! 최저 최고는 {2}! 체감온도는 {3}! 미세먼지는 {4}!".format(todayTemp, todayCast, todayMerge, todaySensible, todayDust)
+        result = "{0}의 현재 날씨는! 기온 {1}℃, 습도 {2}, 풍향풍속: {3}, {4}m/s".format(
+            coordinate[0],nowWeather['T1H'], nowWeather['REH'], weather.findVEC(nowWeather['VEC']), nowWeather['WSD'])
         dispatcher.utter_message(result)
 
         return []
@@ -71,59 +45,80 @@ class ActionTemp(Action):
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
 
-        encText = urllib.parse.quote('춘천시 효자동 날씨')
-        url = 'https://search.naver.com/search.naver?sm=top_hty&fbm=1&ie=utf8&query=' + encText
-        request = urllib.request.Request(url)
-        request.add_header("X-Naver-Client-Id",client_id)
-        request.add_header("X-Naver-Client-Secret",client_secret)
-        response = urllib.request.urlopen(request)
-        bsObj = BeautifulSoup(response, "html.parser")
-        todayBase = bsObj.find('div', {'class': 'today_area _mainTabContent'})
-
-        temp = bsObj.find('div', {'class': 'select_box'})
-
-        temp = todayBase.find('span', {'class': 'todaytemp'})
-        todayTemp = temp.text.strip()
-
-        temp = todayBase.find('span', {'class': 'sensible'})
-        temp2 = temp.find('span', {'class': 'num'})
-        todaySensible = temp2.text.strip()
-
-        result = "기온은 {0}! 체감온도는 {1}!".format(todayTemp, todaySensible)
+        ## 원하는 위치로 수정 가능
+        coordinate = weather.getLocation("춘천")
+        nowWeather = weather.getNowWeatherData(coordinate)
+        todayWeather = weather.getTodayWeatherData(coordinate)
+        
+        result = "현재 기온은 {}℃!".format(
+            nowWeather['T1H']
+        )
         dispatcher.utter_message(result)
+
+        result = "앞으로 예상 기온은 {}℃!".format(
+            todayWeather['T3H']
+        )
+        dispatcher.utter_message(result)
+
+        if "TMN" in todayWeather:
+            result = "아침 최저 기온은 {}℃!".format(
+                todayWeather['TMN']
+            )
+            dispatcher.utter_message(result)
+
+        if "TMX" in todayWeather:
+            result = "낮 최고 기온은 {}℃!".format(
+                todayWeather['TMX']
+            )
+            dispatcher.utter_message(result)
 
         return []
 
-class ActionTomorrowTemp(Action):
+class ActionNextTemp(Action):
 
     def name(self) -> Text:
-        return "action_tomorrow_temp"
+        return "action_next_temp"
 
     def run(self, dispatcher: CollectingDispatcher,
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
 
-        encText = urllib.parse.quote('춘천시 효자동 날씨')
-        url = 'https://search.naver.com/search.naver?sm=top_hty&fbm=1&ie=utf8&query=' + encText
-        request = urllib.request.Request(url)
-        request.add_header("X-Naver-Client-Id",client_id)
-        request.add_header("X-Naver-Client-Secret",client_secret)
-        response = urllib.request.urlopen(request)
-        bsObj = BeautifulSoup(response, "html.parser")
+        coordinate = weather.getLocation("춘천")
+        nowWeather = weather.getNowWeatherData(coordinate)
+        todayWeather = weather.getTodayWeatherData(coordinate)
 
-        temp = bsObj.find('div', {'class': 'select_box'})
-        temp2 = temp.find('em')
+        dispatcher.utter_message('{0}의 현재 날씨!'.format(coordinate[0]))
+        dispatcher.utter_message('현재 기온: {}℃'.format(nowWeather['T1H']))
+        dispatcher.utter_message('1시간 내 강수량: {}'.format(weather.findRN(nowWeather['RN1'])))
+        dispatcher.utter_message('현재 습도: {}%'.format(nowWeather['REH']))
+        dispatcher.utter_message('풍향풍속: {}, {}m/s'.format(weather.findVEC(nowWeather['VEC']), nowWeather['WSD']))
 
-        tomorrowBase = bsObj.find_all('div', {'class': 'main_info morning_box'})
+        dispatcher.utter_message('-----------------------------------------')
 
-        temp = tomorrowBase[0].find('span', {'class': 'todaytemp'})
-        tomorrowTemp = temp.text.strip()
+        dispatcher.utter_message('{0}의 오늘 예보!'.format(coordinate[0]))
 
-        temp = tomorrowBase[0].find('ul', {'class': 'info_list'})
-        temp2 = temp.find('p', {'class': 'cast_txt'})
-        tomorrowWeather = temp2.text.strip()
+        dispatcher.utter_message('강수 확률: {}%'.format(todayWeather['POP']))
+        dispatcher.utter_message('예상되는 강수 형태: {}'.format(weather.findPTY(todayWeather['PTY'])))
 
-        result = "내일날씨 {0}! 온도는 {1}!".format(tomorrowWeather, tomorrowTemp)
-        dispatcher.utter_message(result)
+        if "R06" in todayWeather:
+            dispatcher.utter_message('예상되는 6시간 강수량: {}'.format(weather.findRN(todayWeather['R06'])))
+
+        dispatcher.utter_message('습도: {}%'.format(todayWeather['REH']))
+
+        if "S06" in todayWeather:
+            dispatcher.utter_message('예상되는 6시간 적설량: {}'.format(weather.findSO(todayWeather['S06'])))
+
+        dispatcher.utter_message('하늘 형태: {}'.format(weather.getSKY(todayWeather['SKY'])))
+
+        if "TMN" in todayWeather:
+            dispatcher.utter_message('아침 최저기온: {}℃'.format(todayWeather['TMN']))
+        if "TMX" in todayWeather:
+            dispatcher.utter_message('낮 최고기온: {}℃'.format(todayWeather['TMX']))
+
+        dispatcher.utter_message('3시간 기온: {}℃'.format(todayWeather['T3H']))
+        dispatcher.utter_message('풍향풍속: {}, {}m/s'.format(weather.findVEC(todayWeather['VEC']), todayWeather['WSD']))
+
+        if "WAV" in todayWeather:
+            dispatcher.utter_message('파고: {}M'.format(todayWeather['WAV']))
 
         return []

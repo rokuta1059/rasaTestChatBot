@@ -3,14 +3,14 @@ intents:
   - goodbye
   - weather
   - temp
-  - tomorrow_temp
+  - next_temp
 
 actions:
 - utter_greet
 - utter_goodbye
 - action_weather
 - action_temp
-- action_tomorrow_temp
+- action_next_temp
 
 templates:
   utter_greet:

@@ -123,7 +123,7 @@ pyasn1-modules==0.2.8
 pycparser==2.19
 pydot==1.4.1
 pyglet==1.4.10
-Pygments==2.5.2
+Pygments==2.7.4
 PyJWT==1.7.1
 pykwalify==1.7.0
 pylint==2.4.4

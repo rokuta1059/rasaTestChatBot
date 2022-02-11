@@ -116,7 +116,7 @@ preshed==2.0.1
 prometheus-client==0.7.1
 promise==2.3
 prompt-toolkit==2.0.10
-protobuf==3.11.3
+protobuf==3.15.0
 psutil==5.6.7
 pyasn1==0.4.8
 pyasn1-modules==0.2.8

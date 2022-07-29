@@ -90,7 +90,7 @@ mattermostwrapper==2.1
 mccabe==0.6.1
 mecab-python===0.996-ko-0.9.2-msvc
 mesh-tensorflow==0.1.9
-mistune==0.8.4
+mistune==2.0.3
 more-itertools==8.2.0
 mpmath==1.1.0
 multidict==4.7.4
